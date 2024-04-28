@@ -51,7 +51,7 @@ def cari_wisata():
     columns = [col[0] for col in cursor.description]  
     wisata_rows = cursor.fetchall()
 
-   
+
     wisata = []
     for row in wisata_rows:
         row_data = dict(zip(columns, row))

@@ -42,6 +42,21 @@ app.get('/tiket', (req, res) => {
     });
 });
 
+// Mengubah data tiket berdasarkan ID
+app.put('/tiket/:id', (req, res) => {
+    const id = req.params.id;
+    const newData = req.body;
+
+    connection.query('UPDATE tiket SET ? WHERE id = ?', [newData, id], (error, results) => {
+        if (error) {
+            console.error('Error executing update query:', error);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+        res.send('Data tiket berhasil diubah');
+    });
+});
+
 // Mendapatkan tiket berdasarkan ID
 app.get('/tiket/:id', (req, res) => {
     const id = req.params.id;
