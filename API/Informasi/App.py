@@ -44,13 +44,12 @@ def informasi():
 
 
 @app.route('/cariwisata', methods=['GET'])
-def cari_wisata():
-    id_wisata = request.args.get('id')  
+def cari_wisata_by_nama():
+    nama_wisata = request.args.get('nama')  
     cursor = mysql.connection.cursor()
-    cursor.execute("SELECT * FROM wisata WHERE id = %s", (id_wisata,))
+    cursor.execute("SELECT * FROM wisata WHERE nama_wisata LIKE %s", ('%' + nama_wisata + '%',))
     columns = [col[0] for col in cursor.description]  
     wisata_rows = cursor.fetchall()
-
 
     wisata = []
     for row in wisata_rows:
@@ -61,9 +60,7 @@ def cari_wisata():
         wisata.append(row_data)
 
     cursor.close()
-    return jsonify(wisata) 
-
-    
+    return jsonify(wisata)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port =5000, debug=True)
