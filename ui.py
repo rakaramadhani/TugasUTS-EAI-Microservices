@@ -20,8 +20,9 @@ def informasi_page():
     if data:
         st.write("---")
         for item in data:
-            st.subheader(f"{item['acara_lokal']}")
+            st.subheader(f"{item['nama_wisata']}")
             st.write(f"Location: {item['lokasi']}")
+            st.write(f"Location: {item['acara_lokal']}")
             st.write(f"Open Time: {item['open']}")
             st.write(f"Close Time: {item['close']}")
             st.write(f"Description: {item['deskripsi']}")
@@ -39,8 +40,9 @@ if st.button("search"):
     # Displaying data if available
     if wisata_data:
         for item in wisata_data:
-            st.subheader(f"{item['acara_lokal']}")
+            st.subheader(f"{item['nama_wisata']}")
             st.write(f"Location: {item['lokasi']}")
+            st.write(f"Location: {item['acara_lokal']}")
             st.write(f"Open Time: {item['open']}")
             st.write(f"Close Time: {item['close']}")
             st.write(f"Description: {item['deskripsi']}")
