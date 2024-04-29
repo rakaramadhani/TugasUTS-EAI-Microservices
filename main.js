@@ -34,7 +34,7 @@ function fetchTiketList() {
                                     <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">${tiket.lokasi}</p>
                                     <p class="text-lg mb-3 font-normal text-gray-700 dark:text-indigo-400">Mulai dari: <span class="font-bold text-indigo-500">Rp.${tiket.harga}</span> / orang</p>
                                     <p class="text-lg mb-3 font-normal text-gray-700 dark:text-indigo-400">Tiket tersisa <span class="text-red-500 font-bold">${tiket.stock}</span></p>
-                                    <a href="detailTicket.html?id=${tiket.id}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                    <a href="/detailTicket?id=${tiket.id}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                                         Beli Sekarang
                                         <svg class="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
@@ -109,11 +109,11 @@ function beliTiket(id, jumlah) {
         // Jika data adalah objek, asumsikan itu adalah JSON dan periksa properti 'success'
         if (typeof data === 'object' && data.success) {
             alert('Pembelian tiket berhasil!');
-            window.location.href = 'confirmationTicket.html';
+            window.location.href = '/confirmationTicket';
         } else if (typeof data === 'string' && data.includes("Pembelian tiket berhasil")) {
             // Jika data adalah string dan mengandung pesan sukses, tangani sebagai sukses
             alert('Pembelian tiket berhasil!');
-            window.location.href = 'confirmationTicket.html';
+            window.location.href = '/confirmationTicket';
         } else {
             // Jika tidak ada kasus di atas, lempar error
             throw new Error('Server mengembalikan error: ' + data);
