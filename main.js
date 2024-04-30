@@ -63,7 +63,7 @@ function fetchTiketDetail(id) {
             const detailContainer = document.getElementById('detailTiket');
             detailContainer.innerHTML = `
                 <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-10">
-                    <h2 class="text-center mb-10 text-4xl font-bold text-gray-900">${data.nama_wisata}</h2>
+                    <h2 class="text-center mb-10 text-4xl font-bold text-gray-900"><span id="tiketId" class="text-red-500">${data.id}</span>. ${data.nama_wisata}</h2>
                     <p class="text-gray-600">Harga: <span class="text-red-500 font-bold">${data.harga}</span></p>
                     <p class="text-gray-600">Stok: <span class="text-red-500 font-bold">${data.stock}</span></p>
                     <p class="text-gray-600">Buka pada: <span class="text-blue-500 font-bold">${data.open}</span> WIB</p>
