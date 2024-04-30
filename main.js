@@ -62,19 +62,18 @@ function fetchTiketDetail(id) {
         .then(data => {
             const detailContainer = document.getElementById('detailTiket');
             detailContainer.innerHTML = `
-                <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-5">
-                    <h2 class="text-lg font-semibold text-gray-900">Detail Tiket: ${data.nama_wisata}</h2>
-                    <p class="text-gray-600">ID: <span id="tiketId">${data.id}</span></p>
-                    <p class="text-gray-600">Harga: ${data.harga}</p>
-                    <p class="text-gray-600">Stok: ${data.stock}</p>
-                    <p class="text-gray-600">Buka pada: ${data.open} WIB</p>
-                    <p class="text-gray-600">Tutup pada: ${data.close} WIB</p>
-                    <p class="text-gray-600">Lokasi: ${data.lokasi}</p>
+                <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-10">
+                    <h2 class="text-center mb-10 text-4xl font-bold text-gray-900">${data.nama_wisata}</h2>
+                    <p class="text-gray-600">Harga: <span class="text-red-500 font-bold">${data.harga}</span></p>
+                    <p class="text-gray-600">Stok: <span class="text-red-500 font-bold">${data.stock}</span></p>
+                    <p class="text-gray-600">Buka pada: <span class="text-blue-500 font-bold">${data.open}</span> WIB</p>
+                    <p class="text-gray-600">Tutup pada: <span class="text-blue-500 font-bold">${data.close}</span> WIB</p>
+                    <p class="text-gray-600">Lokasi: <span class=" font-bold">${data.lokasi}</span></p>
                     <div class="mt-4">
                         <label for="jumlah" class="block text-sm font-medium text-gray-700">Jumlah tiket yang ingin di beli:</label>
                         <div>
-                            <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Small input</label>
-                            <input type="number" id="jumlah" name="jumlah" min="1" max="${data.stock}" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <label for="small-input" class="block mb-2 text-sm font-medium text-gray-900"></label>
+                            <input type="number" id="jumlah" name="jumlah" min="1" max="${data.stock}" class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-100 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-700 dark:focus:ring-blue-500 dark:focus:border-blue-500">
                         </div>
                     </div>
                     <button id="beliButton" class="mt-4 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">

@@ -28,9 +28,7 @@ def informasi():
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM wisata")
     wisata_rows = cursor.fetchall()
-
     columns = [col[0] for col in cursor.description]
-
     wisata = []
     for row in wisata_rows:
         row_data = dict(zip(columns, row))
