@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
-const PORT = 3000;
+const PORT = 3000; 
 const cors = require('cors');
 app.use(cors());
 
@@ -42,21 +42,6 @@ app.get('/tiket', (req, res) => {
     });
 });
 
-// Mengubah data tiket berdasarkan ID
-app.put('/tiket/:id', (req, res) => {
-    const id = req.params.id;
-    const newData = req.body;
-
-    connection.query('UPDATE tiket SET ? WHERE id = ?', [newData, id], (error, results) => {
-        if (error) {
-            console.error('Error executing update query:', error);
-            res.status(500).send('Internal Server Error');
-            return;
-        }
-        res.send('Data tiket berhasil diubah');
-    });
-});
-
 // Mendapatkan tiket berdasarkan ID
 app.get('/tiket/:id', (req, res) => {
     const id = req.params.id;
@@ -77,7 +62,7 @@ app.get('/tiket/:id', (req, res) => {
 // Membeli tiket berdasarkan ID
 app.post('/tiket/beli/:id', (req, res) => {
     const id = req.params.id;
-    const jumlahBeli = req.body.jumlah;
+    const { jumlah, nama, nik, email } = req.body; // Menambahkan parameter tambahan
 
     connection.query('SELECT stock FROM tiket WHERE id = ?', id, (error, results) => {
         if (error) {
@@ -90,14 +75,91 @@ app.post('/tiket/beli/:id', (req, res) => {
             return;
         }
 
-        const stockTersedia = results[0].stock;
-        if (stockTersedia < jumlahBeli) {
+        const stock = results[0].stock;
+        if (stock < jumlah) {
+            res.status(400).send('Stock tidak cukup');
+            return;
+        }
+
+        const stockBaru = stock - jumlah;
+        connection.query('UPDATE tiket SET stock = ? WHERE id = ?', [stockBaru, id], (updateError, updateResults) => {
+            if (updateError) {
+                console.error('Error executing update query:', updateError);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+
+            // Menyimpan data pembelian ke tabel pembelian
+            const insertQuery = 'INSERT INTO pembelian (tiket_id, nama_pemesan, nik, email, jumlah) VALUES (?, ?, ?, ?, ?)';
+            connection.query(insertQuery, [id, nama, nik, email, jumlah], (insertError, insertResults) => {
+                if (insertError) {
+                    console.error('Error executing insert query:', insertError);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+                res.send('Pembelian tiket berhasil');
+            });
+        });
+    });
+});
+
+
+// Menambahkan tiket baru
+app.post('/tiket', (req, res) => {
+    const { nama_wisata, open, close, kota, provinsi, negara, harga, stock, image } = req.body;
+    const query = 'INSERT INTO tiket (nama_wisata, open, close, kota, provinsi, negara, harga, stock, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    connection.query(query, [nama_wisata, open, close, kota, provinsi, negara, harga, stock, image], (error, results) => {
+        if (error) {
+            console.error('Error executing insert query:', error);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+        res.status(201).send('Tiket berhasil ditambahkan');
+    });
+});
+
+// Mencari tiket berdasarkan nama wisata dan lokasi
+// Mendapatkan tiket berdasarkan lokasi
+app.get('/lokasi/:lokasi', (req, res) => {
+    const lokasi = req.params.lokasi;
+    connection.query('SELECT * FROM tiket WHERE lokasi = ?', lokasi, (error, results) => {
+        if (error) {
+        console.error('Error executing query:', error);
+        res.status(500).send('Internal Server Error');
+        return;
+        }
+        if (results.length === 0) {
+        res.status(404).send('Tiket tidak ditemukan');
+        } else {
+        res.json(results[0]);
+        }
+    });
+});
+
+// Membeli tiket berdasarkan lokasi
+app.post('/lokasi/beli/:lokasi', (req, res) => {
+    const lokasi = req.params.lokasi;
+    const jumlahBeli = req.body.jumlah;
+
+    connection.query('SELECT stock FROM tiket WHERE lokasi = ?', lokasi, (error, results) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+        if (results.length === 0) {
+            res.status(404).send('Tiket tidak ditemukan');
+            return;
+        }
+
+        const stock = results[0].stock;
+        if (stock < jumlahBeli) {
             res.status(400).send('stock tidak cukup');
             return;
         }
 
-        const stockBaru = stockTersedia - jumlahBeli;
-        connection.query('UPDATE tiket SET stock = ? WHERE id = ?', [stockBaru, id], (updateError, updateResults) => {
+        const stockBaru = stock - jumlahBeli;
+        connection.query('UPDATE tiket SET stock = ? WHERE lokasi = ?', [stockBaru, lokasi], (updateError, updateResults) => {
             if (updateError) {
                 console.error('Error executing update query:', updateError);
                 res.status(500).send('Internal Server Error');
@@ -108,6 +170,114 @@ app.post('/tiket/beli/:id', (req, res) => {
     });
 });
 
+// Memperbarui tiket berdasarkan lokasi
+app.put('/lokasi/:lokasi', (req, res) => {
+    const location = req.params.lokasi;
+    const { nama_wisata, open, close, lokasi, harga, stock, image } = req.body;
+
+    const query = 'UPDATE tiket SET nama_wisata = ?, open = ?, close = ?, lokasi = ?, harga = ?, stock = ?, image = ? WHERE lokasi = ?';
+    connection.query(query, [nama_wisata, open, close, lokasi, harga, stock, image, location], (error, results) => {
+        if (error) {
+            console.error('Error executing update query:', error);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+        if (results.affectedRows === 0) {
+            res.status(404).send('Tiket tidak ditemukan');
+        } else {
+            res.send('Perubahan tiket berhasil');
+        }
+    });
+});
+
+// Mendapatkan tiket berdasarkan lokasi
+app.get('/lokasi/:kota', (req, res) => {
+    const kota = req.params.kota;
+    connection.query('SELECT * FROM tiket WHERE kota = ?', kota, (error, results) => {
+        if (error) {
+        console.error('Error executing query:', error);
+        res.status(500).send('Internal Server Error');
+        return;
+        }
+        if (results.length === 0) {
+        res.status(404).send('Tiket tidak ditemukan');
+        } else {
+        res.json(results[0]);
+        }
+    });
+});
+
+// Membeli tiket berdasarkan lokasi
+app.post('/lokasi/beli/:kota', (req, res) => {
+    const kota = req.params.kota;
+    const jumlahBeli = req.body.jumlah;
+
+    connection.query('SELECT stock FROM tiket WHERE kota = ?', kota, (error, results) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+        if (results.length === 0) {
+            res.status(404).send('Tiket tidak ditemukan');
+            return;
+        }
+
+        const stock = results[0].stock;
+        if (stock < jumlahBeli) {
+            res.status(400).send('stock tidak cukup');
+            return;
+        }
+
+        const stockBaru = stock - jumlahBeli;
+        connection.query('UPDATE tiket SET stock = ? WHERE kota = ?', [stockBaru, kota], (updateError, updateResults) => {
+            if (updateError) {
+                console.error('Error executing update query:', updateError);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+            res.send('Pembelian tiket berhasil');
+        });
+    });
+});
+
+// Memperbarui tiket berdasarkan ID
+app.put('/tiket/:id', (req, res) => {
+    const id = req.params.id;
+    const { nama_wisata, open, close, kota, provinsi, negara, harga, stock, image } = req.body;
+
+    const query = 'UPDATE tiket SET nama_wisata = ?, open = ?, close = ?, kota = ?, provinsi = ?, negara = ?, harga = ?, stock = ?, image = ? WHERE id = ?';
+    connection.query(query, [nama_wisata, open, close, kota, provinsi, negara, harga, stock, image, id], (error, results) => {
+        if (error) {
+            console.error('Error executing update query:', error);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+        if (results.affectedRows === 0) {
+            res.status(404).send('Tiket tidak ditemukan');
+        } else {
+            res.send('Perubahan tiket berhasil');
+        }
+    });
+});
+
+// Menghapus tiket berdasarkan ID
+app.delete('/tiket/:id', (req, res) => {
+    const id = req.params.id;
+
+    connection.query('DELETE FROM tiket WHERE id = ?', id, (error, results) => {
+        if (error) {
+            console.error('Error executing delete query:', error);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+        if (results.affectedRows === 0) {
+            res.status(404).send('Tiket tidak ditemukan');
+        } else {
+            res.send('Penghapusan tiket berhasil');
+        }
+    });
+});
 
 
 // Menjalankan server pada port 3000

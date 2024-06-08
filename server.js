@@ -2,6 +2,10 @@ const express = require('express');
 const path = require('path');
 const app = express();
 const port = 5002;
+const cors = require('cors');
+
+app.use(cors());
+
 
 
 // Rute untuk membuka file main.js
@@ -25,6 +29,13 @@ app.get('/detailTicket', (req, res) => {
 // Rute untuk membuka file confirmationTicket.html
 app.get('/confirmationTicket', (req, res) => {
     res.sendFile(path.join(__dirname, 'confirmationTicket.html'));
+});
+
+app.get('/flight', (req, res) => {
+    res.sendFile(path.join(__dirname, 'getFlightList.html'));
+});
+app.get('/flightID', (req, res) => {
+    res.sendFile(path.join(__dirname, 'getFlightList.html'));
 });
 
 // Menjalankan server pada port 3000
