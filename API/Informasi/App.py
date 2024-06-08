@@ -60,5 +60,48 @@ def cari_wisata_by_nama():
     cursor.close()
     return jsonify(wisata)
 
+@app.route('/createwisata', methods=['POST'])
+
+def create_wisata():
+    data = request.get_json()
+    cursor = mysql.connection.cursor()
+    cursor.execute(
+        "INSERT INTO wisata (nama_wisata, lokasi, deskripsi, open, close, waktu_buka) VALUES (%s, %s, %s, %s, %s, %s)",
+        (data['nama_wisata'], data['lokasi'], data['deskripsi'], data['open'], data['close'], data['waktu_buka'])
+    )
+    mysql.connection.commit()
+    cursor.close()
+    return jsonify({"message": "Wisata created successfully"}), 201
+
+@app.route('/updatewisata', methods=['PUT'])
+
+def update_wisata():
+    data = request.get_json()
+    parameter = request.args.get('parameter')
+    value = request.args.get('value')
+
+    query = "UPDATE wisata SET nama_wisata=%s, lokasi=%s, deskripsi=%s, open=%s, close=%s, waktu_buka=%s WHERE " + parameter + "=%s"
+    values = (data['nama_wisata'], data['lokasi'], data['deskripsi'], data['open'], data['close'], data['waktu_buka'], value)
+
+    cursor = mysql.connection.cursor()
+    cursor.execute(query, values)
+    mysql.connection.commit()
+    cursor.close()
+    return jsonify({"message": "Wisata updated successfully"})
+
+@app.route('/deletewisata', methods=['DELETE'])
+
+def delete_wisata():
+    parameter = request.args.get('parameter')
+    value = request.args.get('value')
+
+    query = "DELETE FROM wisata WHERE " + parameter + "=%s"
+
+    cursor = mysql.connection.cursor()
+    cursor.execute(query, (value,))
+    mysql.connection.commit()
+    cursor.close()
+    return jsonify({"message": "Wisata deleted successfully"}), 200
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port =5000, debug=True)
