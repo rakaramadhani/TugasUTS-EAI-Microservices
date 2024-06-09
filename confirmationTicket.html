@@ -5,14 +5,93 @@
     <title>Konfirmasi Pembelian Tiket</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
-    <div class="max-w-md w-full bg-white p-6 rounded-lg shadow-md">
-        <h1 class="text-2xl font-bold text-center mb-4">Konfirmasi Pembelian Tiket</h1>
-        <p class="text-center mb-4">Pembelian tiket Anda telah berhasil!</p>
-        <a href="/getTicketList" class="block text-center text-blue-500 hover:underline">Kembali ke Daftar Tiket</a>
-        <a href="/flight" class="block text-center text-blue-500 hover:underline">Cari Tiket Pesawatnya ?
-        </a>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen m-8">
+    <div class="max-w-2xl w-full bg-white p-8 rounded-lg shadow-md mb-6">
+        <div id="informasiPembelian" class="mb-6">
+            <h1 class="text-2xl font-bold text-center mb-4">Pembelian tiket Anda telah berhasil!</h1>
+            <div id="detailPembelian" class="space-y-2"></div>
+        </div>
+        <a href="/getTicketList" class="block text-center text-blue-500 hover:underline mb-6">Kembali ke Daftar Tiket</a>
     </div>
+    
+    <div id="ticketList" class="max-w-2xl w-full bg-white p-8 rounded-lg shadow-md">
+        <!-- Konten tiket akan dimasukkan di sini -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const idPembelian = localStorage.getItem('idPembelian');
+            if (idPembelian) {
+                fetch(`http://localhost:3000/pembelian/${idPembelian}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const detailElement = document.getElementById('informasiPembelian');
+                        detailElement.innerHTML = `
+                            <h1 class="text-2xl font-bold text-center mb-4">Pembelian tiket Anda telah berhasil!</h1>
+                            <p>Nama Pemesan: <span class="text-green-600">${data.nama_pemesan}</span></p>
+                            <p>NIK: ${data.nik}</p>
+                            <p>Email: ${data.email}</p>
+                            <p>Jumlah Tiket: ${data.jumlah}</p>
+
+                            <h2 class="text-xl font-bold mb-4">Selamat <span class="text-green-600">${data.nama_pemesan}</span>, Anda akan berlibur ke <span class="text-blue-600">${data.nama_wisata}</span> yang terletak di <span class="text-purple-600">${data.lokasi}</span>!</h2>
+                        `;
+                        flightbyLocation(data.kota);
+                    })
+                    .catch(error => console.error('Error:', error));
+            } else {
+                console.error('ID Pembelian tidak ditemukan');
+            }
+        });
+
+        function flightbyLocation(kota) {
+            const listContainer = document.getElementById('ticketList');
+            if (listContainer) {
+                fetch(`http://127.0.0.1:5000/flights/to/${kota}`, {
+                    headers: new Headers({
+                        "ngrok-skip-browser-warning": "69420",
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        if (data.data.length === 0) {
+                            listContainer.innerHTML = `
+                            <h2 class="text-xl font-bold mb-4">Yuk beli tiketnya sekalian ke ${kota}!</h2>
+                            <p class="text-red-500 text-center">Maaf, tiket menuju ke <span class="text-blue-500">${kota}</span> tidak tersedia saat ini.</p>`;
+                        } else {
+                            listContainer.innerHTML = `
+                            <h2 class="text-xl font-bold mb-4">Yuk beli tiketnya sekalian ke ${kota}!</h2>
+                            <ul class="space-y-4">
+                                ${data.data.map(flight => `
+                                    <li class="bg-white border border-gray-200 rounded-lg shadow-lg p-5">
+                                        <div class="flex justify-between items-center">
+                                            <div>
+                                                <h5 class="text-xl font-bold text-gray-900">${flight.nama_maskapai} - ${flight.kode_penerbangan}</h5>
+                                                <p class="text-sm font-medium text-gray-700">${flight.departure_city} (${flight.dept_IATA}) - ${flight.arrival_city} (${flight.dest_IATA})</p>
+                                                <div class="text-gray-700">
+                                                    <p>Departure: ${new Date(flight.dept_time).toLocaleString()}</p>
+                                                    <p>Arrival: ${new Date(flight.arriv_time).toLocaleString()}</p>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-lg font-bold text-indigo-600">Rp.${flight.harga.toLocaleString()} / pax</p>
+                                                <p class="text-sm font-medium text-red-500">Tickets remaining: ${flight.jumlah_tiket}</p>
+                                                <a href="/flightID?kode_penerbangan=${flight.kode_penerbangan}" class="mt-2 inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">
+                                                    Choose
+                                                    <svg class="w-3.5 h-3.5 ml-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                `).join('')}
+                                </ul>`;
+                        }
+                        
+                    });
+            }
+        }
+    </script>
 </body>
-<script src="main.js"></script>
 </html>

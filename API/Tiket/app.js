@@ -62,7 +62,7 @@ app.get('/tiket/:id', (req, res) => {
 // Membeli tiket berdasarkan ID
 app.post('/tiket/beli/:id', (req, res) => {
     const id = req.params.id;
-    const { jumlah, nama, nik, email } = req.body; // Menambahkan parameter tambahan
+    const { jumlah, nama, nik, email } = req.body;
 
     connection.query('SELECT stock FROM tiket WHERE id = ?', id, (error, results) => {
         if (error) {
@@ -89,7 +89,6 @@ app.post('/tiket/beli/:id', (req, res) => {
                 return;
             }
 
-            // Menyimpan data pembelian ke tabel pembelian
             const insertQuery = 'INSERT INTO pembelian (tiket_id, nama_pemesan, nik, email, jumlah) VALUES (?, ?, ?, ?, ?)';
             connection.query(insertQuery, [id, nama, nik, email, jumlah], (insertError, insertResults) => {
                 if (insertError) {
@@ -97,12 +96,83 @@ app.post('/tiket/beli/:id', (req, res) => {
                     res.status(500).send('Internal Server Error');
                     return;
                 }
-                res.send('Pembelian tiket berhasil');
+
+                const pembelianId = insertResults.insertId;
+
+                const selectQuery = `
+                    SELECT p.id AS id_pembelian, p.nama_pemesan, p.nik, p.email, p.jumlah,
+                           t.nama_wisata, t.kota, t.negara, t.provinsi, t.lokasi
+                    FROM pembelian p
+                    JOIN tiket t ON p.tiket_id = t.id
+                    WHERE p.id = ?
+                `;
+                connection.query(selectQuery, [pembelianId], (selectError, selectResults) => {
+                    if (selectError) {
+                        console.error('Error executing select query:', selectError);
+                        res.status(500).send('Internal Server Error');
+                        return;
+                    }
+
+                    if (selectResults.length === 0) {
+                        res.status(404).send('Pembelian tidak ditemukan');
+                        return;
+                    }
+
+                    res.json({
+                        message: 'Pembelian tiket berhasil',
+                        detailPembelian: selectResults[0]
+                    });
+                });
             });
         });
     });
 });
 
+app.get('/pembelian/:id', (req, res) => {
+    const id = req.params.id;
+
+    const selectQuery = `
+        SELECT p.id AS id_pembelian, p.nama_pemesan, p.nik, p.email, p.jumlah,
+               t.nama_wisata, t.kota, t.negara, t.provinsi, t.lokasi
+        FROM pembelian p
+        JOIN tiket t ON p.tiket_id = t.id
+        WHERE p.id = ?
+    `;
+    connection.query(selectQuery, [id], (selectError, selectResults) => {
+        if (selectError) {
+            console.error('Error executing select query:', selectError);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+
+        if (selectResults.length === 0) {
+            res.status(404).send('Pembelian tidak ditemukan');
+            return;
+        }
+
+        res.json(selectResults[0]);
+    });
+});
+
+
+
+
+// Mendapatkan detail pembelian berdasarkan ID pembelian
+app.get('/pembelian/:id', (req, res) => {
+    const id = req.params.id;
+    connection.query('SELECT * FROM pembelian WHERE id = ?', id, (error, results) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+        if (results.length === 0) {
+            res.status(404).send('Pembelian tidak ditemukan');
+            return;
+        }
+        res.json(results[0]);
+    });
+});
 
 // Menambahkan tiket baru
 app.post('/tiket', (req, res) => {

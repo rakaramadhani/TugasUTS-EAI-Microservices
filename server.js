@@ -35,7 +35,10 @@ app.get('/flight', (req, res) => {
     res.sendFile(path.join(__dirname, 'getFlightList.html'));
 });
 app.get('/flightID', (req, res) => {
-    res.sendFile(path.join(__dirname, 'getFlightList.html'));
+    res.sendFile(path.join(__dirname, 'getFlightByID.html'));
+});
+app.get('/flightID/confirtmation', (req, res) => {
+    res.sendFile(path.join(__dirname, 'flightTicketConfirmation.html'));
 });
 
 // Menjalankan server pada port 3000
